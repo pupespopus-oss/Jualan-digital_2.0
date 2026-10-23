@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KaryaKu — Etalase Digital, Koin & Voucher Kreator</title>
+<meta name="description" content="Platform etalase digital lengkap dengan sistem koin harian, tukar voucher, redeem code, dan akun pemilik.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ink: '#121210',
+        cream: '#FAF6EE',
+        paper: '#FFFFFF',
+        coral: '#FF4A1F',
+        magenta: '#E60067',
+        purple: '#7C3AED',
+        leaf: '#16A34A',
+        sun: '#FFD60A'
+      },
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        serif: ['Fraunces', 'serif']
+      },
+      boxShadow: {
+        soft: '0 20px 45px -15px rgba(18,18,16,.18)',
+        card: '0 10px 30px -12px rgba(18,18,16,.15)',
+        phone: '0 40px 80px -20px rgba(18,18,16,.4)'
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400..700&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+  body { background: #FAF6EE; color: #121210; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  ::selection { background: #FFD60A; color: #121210; }
+  :focus-visible { outline: 3px solid #E60067; outline-offset: 2px; border-radius: 4px; }
+
+  .grad-text { background: linear-gradient(118deg, #FF4A1F 0%, #E60067 50%, #7C3AED 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+  .grad-bg { background: linear-gradient(120deg, #FF4A1F 0%, #E60067 50%, #7C3AED 100%); }
+
+  .card { background: #FFFFFF; border: 1px solid rgba(18,18,16,.08); border-radius: 1.5rem; box-shadow: 0 10px 30px -12px rgba(18,18,16,.15); }
+  .card-hover { transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s cubic-bezier(.2,.7,.2,1); }
+  .card-hover:hover { transform: translateY(-5px); box-shadow: 0 25px 50px -20px rgba(18,18,16,.3); }
+
+  .btn-ink { background: #121210; color: #FAF6EE; transition: all .25s ease; }
+  .btn-ink:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -10px rgba(18,18,16,.4); background: #000; }
+  .btn-grad { position: relative; overflow: hidden; background: linear-gradient(120deg, #FF4A1F 0%, #E60067 50%, #7C3AED 100%); transition: all .25s ease; }
+  .btn-grad:hover { transform: translateY(-2px); box-shadow: 0 16px 35px -12px rgba(230,0,103,.5); }
+
+  /* Cart Badge Pop */
+  .cart-badge { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 9999px; background: #E60067; color: #fff; font-size: 10px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; border: 2px solid #FAF6EE; transform: scale(0); transition: transform .3s; }
+  .cart-badge.badge-show { transform: scale(1); }
+  @keyframes pop { 0%{transform:scale(.3)} 55%{transform:scale(1.5)} 100%{transform:scale(1)} }
+  .cart-badge.pop { animation: pop .4s cubic-bezier(.2,.9,.3,1.4); }
+
+  /* Sidebar Drawer */
+  #sidebarOverlay { opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  #sidebarOverlay.open { opacity: 1; pointer-events: auto; }
+  #leftSidebar { transform: translateX(-100%); transition: transform .35s cubic-bezier(.32,.72,.25,1); }
+  #leftSidebar.open { transform: translateX(0); }
+
+  /* Modals */
+  .modal-overlay { opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-panel { transform: translateY(20px) scale(.97); opacity: 0; transition: all .35s cubic-bezier(.32,.72,.25,1); }
+  .modal-overlay.open .modal-panel { transform: none; opacity: 1; }
+
+  /* Toast */
+  #toast { transform: translateY(24px); opacity: 0; transition: all .3s cubic-bezier(.2,.7,.2,1); }
+  #toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body class="bg-cream text-ink">
+
+<!-- SVG Symbols -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF4A1F"/><stop offset=".5" stop-color="#E60067"/><stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <symbol id="logoMark" viewBox="0 0 40 40">
+    <rect width="40" height="40" rx="12" fill="url(#logoGrad)"/>
+    <path d="M13 20h14M20 13l7 7-7 7" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<!-- NAVBAR -->
+<header class="fixed top-0 inset-x-0 z-40 bg-cream/90 backdrop-blur-md border-b border-ink/10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-18 gap-3">
+      <div class="flex items-center gap-3">
+        <!-- Hamburger Menu Button (Left Sidebar) -->
+        <button id="hamburgerBtn" aria-label="Buka Menu" class="p-2.5 rounded-full hover:bg-ink/5 transition flex items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" class="w-6 h-6"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <a href="#" class="flex items-center gap-2 group">
+          <svg class="w-9 h-9 transition-transform group-hover:rotate-6" viewBox="0 0 40 40"><use href="#logoMark"/></svg>
+          <span class="text-xl sm:text-2xl font-extrabold tracking-tight">Karya<span class="grad-text">Ku</span></span>
+        </a>
+      </div>
+
+      <!-- Role Switcher & Coin Display in Header -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Coin Badge -->
+        <div class="bg-sun/30 border border-sun px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-extrabold text-ink shadow-sm">
+          <span>🪙</span> <span id="userCoinsDisplay">0</span> Koin
+        </div>
+
+        <!-- Role Badge -->
+        <div id="roleIndicatorBadge" class="hidden sm:inline-flex items-center gap-1 bg-ink text-cream text-xs font-extrabold px-3 py-1.5 rounded-full">
+          Mode: <span id="roleText" class="text-sun">Pembeli</span>
+        </div>
+
+        <!-- Upload Jualan (Only visible in Seller Mode) -->
+        <button id="openUploadBtn" class="hidden btn-grad text-white text-xs sm:text-sm font-extrabold px-4 py-2 rounded-full items-center gap-1.5 shadow-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4"><path d="M12 5v14M5 12h14"/></svg>
+          Upload Jualan
+        </button>
+
+        <!-- Cart Toggle -->
+        <button id="cartBtn" aria-label="Buka keranjang" class="relative p-2.5 rounded-full hover:bg-ink/5 transition">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M6 8h12l1.2 11.2a2 2 0 01-2 2.3H6.8a2 2 0 01-2-2.3L6 8z"/><path d="M9 11V7a3 3 0 016 0v4"/></svg>
+          <span class="cart-badge">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- LEFT SIDEBAR DRAWER -->
+<div id="sidebarOverlay" class="fixed inset-0 z-50 bg-ink/60 backdrop-blur-sm"></div>
+<aside id="leftSidebar" class="fixed top-0 left-0 z-50 h-[100dvh] w-80 bg-white shadow-phone flex flex-col">
+  <div class="flex items-center justify-between px-6 h-20 border-b border-ink/10 shrink-0">
+    <div class="flex items-center gap-2.5">
+      <svg class="w-8 h-8" viewBox="0 0 40 40"><use href="#logoMark"/></svg>
+      <span class="font-extrabold text-lg tracking-tight">Menu KaryaKu</span>
+    </div>
+    <!-- Exit / Close X Button -->
+    <button id="closeSidebarBtn" class="p-2 rounded-full hover:bg-ink/5 transition text-ink" aria-label="Tutup Menu">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-6 space-y-6">
+    <!-- Account Mode Switcher -->
+    <div class="bg-cream rounded-2xl p-4 border border-ink/10">
+      <p class="text-xs font-extrabold text-ink/70 mb-2">PILIH AKUN / MODE</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button id="modeBuyerBtn" onclick="switchRole('buyer')" class="py-2.5 rounded-xl text-xs font-extrabold border-2 transition text-center">Akun Pembeli</button>
+        <button id="modeSellerBtn" onclick="switchRole('seller')" class="py-2.5 rounded-xl text-xs font-extrabold border-2 transition text-center">Akun Jualan</button>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="space-y-2 text-sm font-bold text-ink/80">
+      <a href="#etalase" onclick="closeSidebar()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition">
+        🛍️ Etalase Karya
+      </a>
+      <a href="#sectionVoucher" onclick="closeSidebar()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition">
+        🎟️ Menu Voucher &amp; Koin
+      </a>
+      <a href="#sectionRedeem" onclick="closeSidebar()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-cream transition">
+        🎁 Redeem Code
+      </a>
+    </nav>
+
+    <!-- Redeem Quick Input in Sidebar -->
+    <div class="bg-paper border border-ink/15 rounded-2xl p-4 space-y-3">
+      <p class="text-xs font-extrabold text-ink">KODE REDEEM CEPAT</p>
+      <div class="flex gap-2">
+        <input type="text" id="sidebarRedeemInput" placeholder="Masukkan kode..." class="flex-1 border border-ink/20 rounded-xl px-3 py-2 text-xs uppercase font-bold outline-none focus:border-ink">
+        <button onclick="handleSidebarRedeem()" class="btn-ink text-xs font-extrabold px-4 py-2 rounded-xl">Klaim</button>
+      </div>
+    </div>
+
+    <!-- Owner Account Portal -->
+    <div class="border-t border-ink/10 pt-4">
+      <button onclick="openOwnerLoginModal()" class="w-full bg-purple/10 hover:bg-purple/20 text-purple border border-purple/30 text-xs font-extrabold py-3 rounded-xl transition flex items-center justify-center gap-2">
+        🔐 Akun Pemilik (Owner Portal)
+      </button>
+    </div>
+  </div>
+
+  <div class="p-4 border-t border-ink/10 text-center text-[11px] text-ink/50 bg-cream/30">
+    Penjaga Link Keamanan Aktif 🛡️
+  </div>
+</aside>
+
+<main class="pt-28 pb-20">
+  <!-- HERO SECTION -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 text-center">
+    <div class="inline-flex items-center gap-2 bg-white border border-ink/10 rounded-full px-4 py-1.5 shadow-sm mb-6">
+      <span class="w-2 h-2 rounded-full bg-magenta animate-ping"></span>
+      <span class="text-xs font-extrabold">Klaim 10 Koin Setiap Hari &amp; Tukar Voucher Diskon!</span>
+    </div>
+    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] max-w-4xl mx-auto">
+      Etalase Digital &amp; Pasar Karya<br><span class="grad-text">Terlengkap di Indonesia.</span>
+    </h1>
+    <p class="mt-6 text-base sm:text-lg text-ink/70 max-w-2xl mx-auto leading-relaxed">
+      Kumpulkan koin gratis setiap hari, tukar dengan voucher belanja, atau switch ke Akun Jualan untuk mulai memajang karya digitalmu!
+    </p>
+
+    <!-- Daily Coin Claim Widget -->
+    <div class="mt-8 inline-block card p-6 bg-white max-w-md w-full shadow-soft">
+      <div class="flex items-center justify-between gap-4">
+        <div class="text-left">
+          <p class="text-xs font-extrabold text-ink/60">Klaim Koin Harian</p>
+          <p class="text-lg font-extrabold text-ink mt-0.5">+10 Koin Gratis Hari Ini</p>
+        </div>
+        <button id="claimDailyBtn" onclick="claimDailyCoins()" class="btn-grad text-white text-xs font-extrabold px-6 py-3 rounded-full shadow-sm">
+          Klaim Sekarang
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ETALASE SECTION -->
+  <section id="etalase" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-24">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div>
+        <span class="text-xs font-extrabold tracking-[0.2em] text-magenta bg-magenta/10 px-3 py-1 rounded-full">ETALASE KARYAKU</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-2">Pilihan Karya &amp; Produk Digital</h2>
+      </div>
+      <div class="flex items-center gap-3">
+        <input id="searchInput" type="text" placeholder="Cari karya atau kreator..." class="bg-white border border-ink/15 rounded-full px-4 py-2.5 text-xs sm:text-sm font-semibold outline-none focus:border-ink w-60 sm:w-72 shadow-sm">
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
+
+  <!-- MENU VOUCHER & TUKAR KOIN -->
+  <section id="sectionVoucher" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-ink/10 scroll-mt-24">
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <span class="text-xs font-extrabold tracking-[0.2em] text-purple bg-purple/10 px-3 py-1 rounded-full">MENU VOUCHER &amp; KOIN</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-3">Tukar Koin Kamu Jadi Voucher Diskon</h2>
+      <p class="text-sm text-ink/70 mt-2">Kumpulkan koin dari klaim harian atau kode redeem lalu tukarkan dengan potongan harga belanja!</p>
+    </div>
+
+    <div id="vouchersGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- MENU REDEEM CODE -->
+  <section id="sectionRedeem" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-ink/10 scroll-mt-24">
+    <div class="card p-8 sm:p-12 text-center bg-white shadow-soft">
+      <span class="text-xs font-extrabold tracking-[0.2em] text-coral bg-coral/10 px-3 py-1 rounded-full">REDEEM CODE</span>
+      <h2 class="text-3xl font-extrabold tracking-tight mt-3">Punya Kode Rahasia atau Promo?</h2>
+      <p class="text-sm text-ink/70 mt-2 max-w-md mx-auto">Masukkan kode redeem untuk mendapatkan koin tambahan atau voucher eksklusif langsung ke akunmu.</p>
+      
+      <div class="mt-8 max-w-md mx-auto flex gap-3">
+        <input type="text" id="mainRedeemInput" placeholder="Ketik kode (misal: KARYAKU2026)" class="flex-1 border-2 border-ink/15 rounded-2xl px-5 py-3.5 text-sm uppercase font-extrabold outline-none focus:border-ink">
+        <button onclick="handleMainRedeem()" class="btn-grad text-white font-extrabold px-6 py-3.5 rounded-2xl shadow-sm text-sm">
+          Tukar Kode
+        </button>
+      </div>
+      <p class="text-xs text-ink/50 mt-3">Coba kode default pemilik: <code class="bg-cream px-2 py-0.5 rounded font-bold text-ink">KARYAKU2026</code> atau <code class="bg-cream px-2 py-0.5 rounded font-bold text-ink">BONUS100</code></p>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-ink text-cream py-12 border-t border-ink/10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+    <div class="flex items-center gap-3">
+      <svg class="w-8 h-8" viewBox="0 0 40 40"><use href="#logoMark"/></svg>
+      <span class="text-xl font-extrabold tracking-tight">Karya<span class="grad-text">Ku</span></span>
+    </div>
+    <p class="text-xs text-cream/60">© <span id="year">2026</span> PT KaryaKu Digital Indonesia. Seluruh hak cipta dilindungi.</p>
+    <div class="flex items-center gap-4 text-xs font-bold text-cream/80">
+      <a href="#etalase" class="hover:text-white transition">Etalase</a>
+      <a href="#sectionVoucher" class="hover:text-white transition">Voucher</a>
+      <a href="#sectionRedeem" class="hover:text-white transition">Redeem</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════ MODAL: UPLOAD PRODUK (JUALAN) ════════ -->
+<div id="uploadModal" class="modal-overlay fixed inset-0 z-50 bg-ink/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="modal-panel bg-white w-full max-w-lg rounded-3xl shadow-phone overflow-hidden max-h-[92vh] flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-ink/10">
+      <h3 class="font-extrabold text-lg tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Upload Jualan Baru (Akun Jualan)
+      </h3>
+      <!-- Exit / Close X Button -->
+      <button onclick="closeModal('uploadModal')" class="p-2 rounded-full hover:bg-ink/5 transition text-ink" aria-label="Tutup"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <form id="uploadForm" class="p-6 overflow-y-auto space-y-4 flex-1">
+      <div>
+        <label class="block text-xs font-extrabold text-ink/70 mb-1">JUDUL KARYA / PRODUK *</label>
+        <input type="text" id="upTitle" required placeholder="Contoh: E-book Masterclass UI/UX" class="w-full border-2 border-ink/15 rounded-xl px-4 py-3 text-sm font-bold focus:border-ink outline-none">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-extrabold text-ink/70 mb-1">KATEGORI *</label>
+          <select id="upCat" class="w-full border-2 border-ink/15 rounded-xl px-4 py-3 text-sm font-bold focus:border-ink outline-none bg-white">
+            <option value="E-Book & Panduan">E-Book &amp; Panduan</option>
+            <option value="Template & UI Kit">Template &amp; UI Kit</option>
+            <option value="Preset & Filter">Preset &amp; Filter</option>
+            <option value="Kelas & Video">Kelas &amp; Video</option>
+            <option value="Link Akses / Web">Link Akses / Web</option>
+            <option value="Foto & Artwork">Foto &amp; Artwork</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-extrabold text-ink/70 mb-1">HARGA (RP) *</label>
+          <input type="number" id="upPrice" required min="0" placeholder="99000" class="w-full border-2 border-ink/15 rounded-xl px-4 py-3 text-sm font-bold focus:border-ink outline-none">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-extrabold text-ink/70 mb-1">NAMA KREATOR / PENJUAL *</label>
+        <input type="text" id="upCreator" required placeholder="Nama atau Brand Kamu" class="w-full border-2 border-ink/15 rounded-xl px-4 py-3 text-sm font-bold focus:border-ink outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-extrabold text-ink/70 mb-1">LINK / FILE DOWNLOAD SETELAH BAYAR *</label>
+        <input type="url" id="upFileLink" required placeholder="https://drive.google.com/..." class="w-full border-2 border-ink/15 rounded-xl px-4 py-3 text-sm font-bold focus:border-ink outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-extrabold text-ink/70 mb-1">DESKRIPSI SINGKAT *</label>
+        <textarea id="upDesc" required rows="3" placeholder="Jelaskan produk..." class="w-full border-2 border-ink/15 rounded-xl px-4 py-3 text-sm font-bold focus:border-ink outline-none resize-none"></textarea>
+      </div>
+      <button type="submit" class="btn-grad w-full text-white font-extrabold py-4 rounded-xl text-sm shadow-soft mt-4">
+        Terbitkan Produk
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ════════ CART DRAWER ════════ -->
+<div id="cartOverlay" class="modal-overlay fixed inset-0 z-50 bg-ink/60 backdrop-blur-sm"></div>
+<aside id="cartDrawer" class="fixed top-0 right-0 z-50 h-[100dvh] w-full max-w-md bg-white shadow-phone flex flex-col transition-transform duration-300 translate-x-full">
+  <div class="flex items-center justify-between px-6 h-20 border-b border-ink/10 shrink-0">
+    <h3 class="font-extrabold text-lg tracking-tight flex items-center gap-2">Keranjang Belanja <span id="cartCountBadge" class="text-xs bg-ink text-cream px-2.5 py-0.5 rounded-full">0</span></h3>
+    <!-- Exit / Close X Button -->
+    <button onclick="closeCart()" class="p-2 rounded-full hover:bg-ink/5 transition text-ink" aria-label="Tutup"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div id="cartEmptyState" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+    <div class="w-20 h-20 rounded-full bg-cream flex items-center justify-center mb-4 text-ink/30">
+      <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8h12l1.2 11.2a2 2 0 01-2 2.3H6.8a2 2 0 01-2-2.3L6 8z"/><path d="M9 11V7a3 3 0 016 0v4"/></svg>
+    </div>
+    <p class="font-extrabold text-lg">Keranjang masih kosong</p>
+    <p class="text-xs text-ink/60 mt-1">Pilih karya digital favoritmu dari etalase sekarang.</p>
+  </div>
+  <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4 divide-y divide-ink/5"></div>
+  <div id="cartFooter" class="p-6 border-t border-ink/10 bg-cream/50 hidden shrink-0 space-y-4">
+    <div class="space-y-2">
+      <label for="cartVoucherSelect" class="block text-xs font-extrabold">Pilih voucher milikmu</label>
+      <select id="cartVoucherSelect" onchange="selectCartVoucher(this.value)" class="w-full border border-ink/20 rounded-xl px-3 py-3 text-sm font-bold bg-white">
+        <option value="">Tanpa voucher</option>
+      </select>
+      <p class="text-[11px] text-ink/60">Voucher yang ditukar dengan koin akan muncul di sini.</p>
+    </div>
+    <!-- Voucher applied info -->
+    <div id="appliedVoucherInfo" class="hidden bg-leaf/10 border border-leaf/30 rounded-xl p-3 flex items-center justify-between text-xs font-bold text-leaf">
+      <span>Voucher Terpakai: <span id="activeVoucherName">-</span></span>
+      <button onclick="removeVoucher()" class="text-ink hover:text-magenta underline">Lepas</button>
+    </div>
+
+    <div class="flex justify-between items-center text-sm font-bold">
+      <span>Total Pembayaran</span>
+      <span id="cartTotalPrice" class="text-xl font-extrabold">Rp 0</span>
+    </div>
+    <button onclick="openQrisModal()" class="btn-grad w-full text-white font-extrabold py-4 rounded-2xl text-sm shadow-soft">
+      Lanjut ke Pembayaran QRIS
+    </button>
+  </div>
+</aside>
+
+<!-- ════════ MODAL: QRIS OTOMATIS ════════ -->
+<div id="qrisModal" class="modal-overlay fixed inset-0 z-60 bg-ink/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="modal-panel bg-white w-full max-w-md rounded-3xl shadow-phone overflow-hidden p-6 sm:p-8 text-center relative">
+    <!-- Exit / Close X Button -->
+    <button onclick="closeModal('qrisModal')" class="absolute top-5 right-5 p-2 rounded-full hover:bg-ink/5 transition text-ink" aria-label="Tutup"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <span class="inline-block bg-coral/10 text-coral text-xs font-extrabold px-3 py-1 rounded-full mb-3">QRIS OTOMATIS</span>
+    <h3 class="text-2xl font-extrabold tracking-tight">Scan QRIS untuk Bayar</h3>
+    <p class="text-xs text-ink/60 mt-1">Buka aplikasi m-banking atau e-wallet (BCA, GoPay, OVO, DANA)</p>
+
+    <div class="my-5 bg-cream rounded-2xl p-4 border border-ink/10">
+      <p class="text-xs font-bold text-ink/60">Total Tagihan (Setelah Voucher)</p>
+      <p id="qrisTotalDisplay" class="text-3xl font-extrabold text-ink mt-0.5">Rp 0</p>
+      <p class="text-[11px] text-magenta font-extrabold mt-1">Timer Pembayaran: <span id="qrisTimer">14:59</span></p>
+    </div>
+
+    <div class="bg-white p-4 rounded-2xl border-2 border-dashed border-ink/20 inline-block mx-auto shadow-sm my-2">
+      <svg class="w-48 h-48 mx-auto" viewBox="0 0 200 200" fill="none">
+        <rect width="200" height="200" fill="white"/>
+        <rect x="10" y="10" width="50" height="50" fill="black"/><rect x="20" y="20" width="30" height="30" fill="white"/><rect x="28" y="28" width="14" height="14" fill="black"/>
+        <rect x="140" y="10" width="50" height="50" fill="black"/><rect x="150" y="20" width="30" height="30" fill="white"/><rect x="158" y="28" width="14" height="14" fill="black"/>
+        <rect x="10" y="140" width="50" height="50" fill="black"/><rect x="20" y="150" width="30" height="30" fill="white"/><rect x="28" y="158" width="14" height="14" fill="black"/>
+        <rect x="70" y="20" width="10" height="10" fill="black"/><rect x="90" y="15" width="15" height="15" fill="black"/><rect x="115" y="25" width="10" height="20" fill="black"/><rect x="70" y="50" width="20" height="10" fill="black"/><rect x="110" y="55" width="15" height="10" fill="black"/>
+        <rect x="20" y="80" width="15" height="15" fill="black"/><rect x="45" y="75" width="10" height="20" fill="black"/><rect x="70" y="75" width="25" height="25" fill="black"/><rect x="125" y="75" width="20" height="20" fill="black"/><rect x="160" y="70" width="15" height="25" fill="black"/>
+        <rect x="15" y="115" width="15" height="15" fill="black"/><rect x="95" y="105" width="25" height="25" fill="black"/><rect x="160" y="115" width="25" height="15" fill="black"/>
+        <rect x="80" y="145" width="15" height="20" fill="black"/><rect x="110" y="140" width="20" height="15" fill="black"/><rect x="170" y="140" width="20" height="20" fill="black"/>
+      </svg>
+    </div>
+
+    <button onclick="simulateQrisSuccess()" class="btn-ink w-full mt-5 py-3.5 rounded-2xl text-xs font-extrabold">
+      [Simulasi] Konfirmasi Pembayaran QRIS Sukses
+    </button>
+  </div>
+</div>
+
+<!-- ════════ MODAL: SUCCESS DOWNLOAD ════════ -->
+<div id="successModal" class="modal-overlay fixed inset-0 z-70 bg-ink/75 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="modal-panel bg-white w-full max-w-md rounded-3xl shadow-phone overflow-hidden p-8 text-center relative">
+    <!-- Exit / Close X Button -->
+    <button onclick="closeModal('successModal')" class="absolute top-5 right-5 p-2 rounded-full hover:bg-ink/5 transition text-ink" aria-label="Tutup"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="w-20 h-20 bg-leaf/15 text-leaf rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h3 class="text-2xl font-extrabold tracking-tight">Pembayaran Sukses!</h3>
+    <p class="text-xs text-ink/60 mt-1">Order ID: <span id="successOrderId" class="font-bold text-ink">INV-2026-9982</span></p>
+
+    <div class="mt-6 bg-cream p-5 rounded-2xl border border-ink/10 text-left space-y-3">
+      <p class="text-xs font-extrabold text-ink">Link Download / Akses Karya:</p>
+      <div id="successLinksContainer" class="space-y-2"></div>
+    </div>
+
+    <button onclick="closeModal('successModal')" class="btn-grad w-full mt-6 py-4 rounded-2xl text-white font-extrabold text-sm shadow-soft">
+      Selesai &amp; Kembali
+    </button>
+  </div>
+</div>
+
+<!-- ════════ MODAL: OWNER LOGIN (AKUN PEMILIK) ════════ -->
+<div id="ownerLoginModal" class="modal-overlay fixed inset-0 z-70 bg-ink/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="modal-panel bg-white w-full max-w-sm rounded-3xl shadow-phone overflow-hidden p-6 sm:p-8 text-center relative">
+    <button onclick="closeModal('ownerLoginModal')" class="absolute top-5 right-5 p-2 rounded-full hover:bg-ink/5 transition text-ink" aria-label="Tutup"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="w-14 h-14 bg-purple/15 text-purple rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl font-bold">🔐</div>
+    <h3 class="text-xl font-extrabold tracking-tight">Akses Akun Pemilik</h3>
+    <p class="text-xs text-ink/60 mt-1">Masukkan kode rahasia pemilik untuk panel konfigurasi &amp; Penjaga Link.</p>
+    
+    <div class="mt-5 space-y-3 text-left">
+      <input type="password" id="ownerPassInput" placeholder="Masukkan kode rahasia pemilik" class="w-full border-2 border-ink/15 rounded-xl px-4 py-3 text-sm font-bold focus:border-ink outline-none">
+      <button onclick="verifyOwnerCode()" class="btn-grad w-full py-3.5 rounded-xl text-white font-extrabold text-xs shadow-soft">
+        Masuk Dashboard Pemilik
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: OWNER DASHBOARD ════════ -->
+<div id="ownerDashboardModal" class="modal-overlay fixed inset-0 z-80 bg-ink/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="modal-panel bg-white w-full max-w-2xl rounded-3xl shadow-phone overflow-hidden max-h-[92vh] flex flex-col relative">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-ink/10 bg-ink text-cream">
+      <h3 class="font-extrabold text-base tracking-tight flex items-center gap-2">
+        🛡️ Dashboard Pemilik &amp; Penjaga Link
+      </h3>
+      <button onclick="closeModal('ownerDashboardModal')" class="p-2 rounded-full hover:bg-white/10 transition text-cream" aria-label="Tutup"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+
+    <div class="p-6 overflow-y-auto space-y-6 flex-1 bg-cream/30">
+      <!-- Config Section -->
+      <div class="card p-5 bg-white">
+        <h4 class="text-sm font-extrabold text-ink mb-3">⚙️ Konfigurasi Sistem (Koin &amp; Voucher)</h4>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[11px] font-extrabold text-ink/70 mb-1">Jumlah Koin Harian</label>
+            <input type="number" id="confDailyCoins" class="w-full border border-ink/20 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-extrabold text-ink/70 mb-1">Ganti Kode Rahasia Pemilik</label>
+            <input type="text" id="confOwnerPass" class="w-full border border-ink/20 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+          </div>
+        </div>
+        <button onclick="saveOwnerConfig()" class="btn-ink mt-3 text-xs font-extrabold px-5 py-2.5 rounded-xl">Simpan Konfigurasi</button>
+      </div>
+
+      <!-- Penjaga Link Security Violations Log -->
+      <div class="card p-5 bg-white">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-sm font-extrabold text-ink flex items-center gap-2">
+            🚨 Notifikasi Pelanggaran ("Penjaga Link")
+          </h4>
+          <button onclick="clearViolations()" class="text-[10px] text-magenta font-extrabold underline">Bersihkan Log</button>
+        </div>
+        <p class="text-xs text-ink/60 mb-3">Mendeteksi percobaan input berbahaya, spam redeem, atau aktivitas mencurigakan.</p>
+        <div id="violationsList" class="space-y-2 max-h-48 overflow-y-auto border border-ink/10 rounded-xl p-3 bg-cream/40">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-90 bg-ink text-cream text-xs font-bold rounded-full px-6 py-3 shadow-phone flex items-center gap-2.5 pointer-events-none">
+  <span id="toastText">Berhasil!</span>
+</div>
+
+<script>
+/* =========================================================
+   KARYAKU — JavaScript Core & Advanced Features
+   ========================================================= */
+'use strict';
+
+const fmtIDR = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+
+// Config & Data Defaults
+let CONFIG = {
+  dailyCoins: 10,
+  ownerPassHash: '103ca28a862919ce775ab95b732bbfad4721721ae36a3a7006b02ea9ccedcf74'
+};
+
+const DEFAULT_PRODUCTS = [
+  {
+    id: 'prod-1',
+    title: 'Bundle 80+ Template Figma UI Kit Modern',
+    cat: 'Template & UI Kit',
+    price: 149000,
+    creator: 'Ayu Sanggar',
+    fileLink: 'https://drive.google.com/file/d/sample-figma-kit/view',
+    desc: 'Template UI kit super lengkap untuk web dan aplikasi mobile siap pakai.',
+    hue: 'linear-gradient(135deg,#7C3AED,#C026D3)',
+    sold: 1420,
+    rating: 4.9
+  },
+  {
+    id: 'prod-2',
+    title: 'Preset Lightroom Cinematic Analog 50+ LUTs',
+    cat: 'Preset & Filter',
+    price: 89000,
+    creator: 'Raka Pratama',
+    fileLink: 'https://drive.google.com/file/d/sample-preset-lut/view',
+    desc: 'Preset foto & video bernuansa sinematik vintage ala film kamera analog.',
+    hue: 'linear-gradient(135deg,#FF4A1F,#E60067)',
+    sold: 980,
+    rating: 4.8
+  },
+  {
+    id: 'prod-3',
+    title: 'E-Book: Strategi Bisnis Digital dari Nol',
+    cat: 'E-Book & Panduan',
+    price: 79000,
+    creator: 'Bimo Aji',
+    fileLink: 'https://drive.google.com/file/d/sample-ebook-bisnis/view',
+    desc: 'Panduan 200 halaman praktis membangun pasif income lewat produk digital.',
+    hue: 'linear-gradient(135deg,#0F766E,#14B8A6)',
+    sold: 630,
+    rating: 5.0
+  }
+];
+
+const VOUCHERS = [
+  { id: 'v-10', name: 'Diskon 10%', coinCost: 30, discountRate: 0.10, code: 'VOUCHER10' },
+  { id: 'v-25', name: 'Diskon 25%', coinCost: 70, discountRate: 0.25, code: 'VOUCHER25' },
+  { id: 'v-50', name: 'Diskon 50% Spesial', coinCost: 130, discountRate: 0.50, code: 'VOUCHER50' }
+];
+
+// App State
+let products = [];
+let cart = [];
+let userCoins = 50;
+let lastClaimDate = '';
+let activeRole = 'buyer'; // 'buyer' or 'seller'
+let ownedVouchers = [];\nlet activeVoucherId = '';
+let securityViolations = [];
+
+function loadAllData() {
+  try {
+    const sConfig = localStorage.getItem('karyaku_config_v2');
+    if (sConfig) { const savedConfig = JSON.parse(sConfig); CONFIG = { ...CONFIG, ...savedConfig }; }
+
+    const sProd = localStorage.getItem('karyaku_products_v2');
+    products = sProd ? JSON.parse(sProd) : [...DEFAULT_PRODUCTS];
+
+    const sCart = localStorage.getItem('karyaku_cart_v2');
+    if (sCart) cart = JSON.parse(sCart);
+
+    const sOwnedVouchers = localStorage.getItem('karyaku_owned_vouchers_v1');\n    if (sOwnedVouchers) ownedVouchers = JSON.parse(sOwnedVouchers);\n    const sActiveVoucher = localStorage.getItem('karyaku_active_voucher_v1');\n    if (sActiveVoucher) activeVoucherId = sActiveVoucher;\n    const sCoins = localStorage.getItem('karyaku_coins_v2');
+    if (sCoins !== null) userCoins = parseInt(sCoins, 10);
+
+    const sDate = localStorage.getItem('karyaku_last_claim_v2');
+    if (sDate) lastClaimDate = sDate;
+
+    const sRole = localStorage.getItem('karyaku_role_v2');
+    if (sRole) activeRole = sRole;
+
+    const sViolations = localStorage.getItem('karyaku_violations_v2');
+    if (sViolations) securityViolations = JSON.parse(sViolations);
+  } catch(e) {
+    products = [...DEFAULT_PRODUCTS];
+  }
+}
+
+function saveAllData() {
+  try {
+    localStorage.setItem('karyaku_config_v2', JSON.stringify(CONFIG));
+    localStorage.setItem('karyaku_products_v2', JSON.stringify(products));
+    localStorage.setItem('karyaku_cart_v2', JSON.stringify(cart));\n    localStorage.setItem('karyaku_owned_vouchers_v1', JSON.stringify(ownedVouchers));\n    localStorage.setItem('karyaku_active_voucher_v1', activeVoucherId);
+    localStorage.setItem('karyaku_coins_v2', userCoins);
+    localStorage.setItem('karyaku_last_claim_v2', lastClaimDate);
+    localStorage.setItem('karyaku_role_v2', activeRole);
+    localStorage.setItem('karyaku_violations_v2', JSON.stringify(securityViolations));
+  } catch(e){}
+}
+
+// Toast notification
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Security Guard ("Penjaga Link") Logger
+function logViolation(type, inputVal) {
+  const log = {
+    time: new Date().toLocaleTimeString() + ' ' + new Date().toLocaleDateString(),
+    type,
+    input: inputVal
+  };
+  securityViolations.unshift(log);
+  if (securityViolations.length > 20) securityViolations.pop();
+  saveAllData();
+}
+
+// Role Switcher
+function switchRole(role) {
+  activeRole = role;
+  saveAllData();
+  updateRoleUI();
+  closeSidebar();
+  showToast(role === 'seller' ? 'Berpindah ke Akun Jualan 📦' : 'Berpindah ke Akun Pembeli 🛒');
+}
+
+function updateRoleUI() {
+  const badge = document.getElementById('roleIndicatorBadge');
+  const roleText = document.getElementById('roleText');
+  const uploadBtn = document.getElementById('openUploadBtn');
+  const buyerBtn = document.getElementById('modeBuyerBtn');
+  const sellerBtn = document.getElementById('modeSellerBtn');
+
+  if (activeRole === 'seller') {
+    badge.classList.remove('hidden');
+    roleText.textContent = 'Jualan (Penjual)';
+    uploadBtn.classList.remove('hidden');
+    uploadBtn.classList.add('inline-flex');
+    sellerBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold border-2 border-ink bg-ink text-cream text-center';
+    buyerBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold border-2 border-ink/20 text-ink text-center';
+  } else {
+    badge.classList.remove('hidden');
+    roleText.textContent = 'Pembeli';
+    uploadBtn.classList.remove('hidden');
+    uploadBtn.classList.add('inline-flex');
+    buyerBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold border-2 border-ink bg-ink text-cream text-center';
+    sellerBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold border-2 border-ink/20 text-ink text-center';
+  }
+  document.getElementById('userCoinsDisplay').textContent = userCoins;
+}
+
+// Sidebar Drawer Control
+const leftSidebar = document.getElementById('leftSidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+document.getElementById('hamburgerBtn').addEventListener('click', () => {
+  leftSidebar.classList.add('open');
+  sidebarOverlay.classList.add('open');
+});
+document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
+sidebarOverlay.addEventListener('click', closeSidebar);
+
+function closeSidebar() {
+  leftSidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('open');
+}
+
+// Generic Modal Close
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove('open');
+}
+
+// Render Products Grid
+const productsGrid = document.getElementById('productsGrid');
+const searchInput = document.getElementById('searchInput');
+
+function renderProducts(filterQuery = '') {
+  const query = filterQuery.toLowerCase().trim();
+  const filtered = products.filter(p => p.title.toLowerCase().includes(query) || p.creator.toLowerCase().includes(query) || p.cat.toLowerCase().includes(query));
+
+  if (filtered.length === 0) {
+    productsGrid.innerHTML = `<div class="col-span-full py-16 text-center text-ink/50 font-semibold">Tidak ada produk ditemukan.</div>`;
+    return;
+  }
+
+  productsGrid.innerHTML = filtered.map(p => `
+    <article class="card card-hover overflow-hidden flex flex-col">
+      <div class="h-40 flex items-center justify-center p-6 text-white font-serif italic text-xl relative" style="background:${p.hue || 'linear-gradient(135deg,#FF4A1F,#7C3AED)'}">
+        <span class="absolute top-3 left-3 bg-white/20 backdrop-blur-md text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">${p.cat}</span>
+        <span class="text-center drop-shadow-md px-4 line-clamp-2">${p.title}</span>
+      </div>
+      <div class="p-6 flex flex-col flex-1 bg-white">
+        <div class="flex items-center justify-between text-xs font-semibold text-ink/60 mb-1">
+          <span>Oleh <strong class="text-ink">${p.creator}</strong></span>
+          <span>⭐ ${p.rating ? p.rating.toFixed(1) : '5.0'}</span>
+        </div>
+        <h3 class="font-extrabold text-base leading-snug line-clamp-2 mt-1">${p.title}</h3>
+        <p class="text-xs text-ink/70 mt-2 line-clamp-2 leading-relaxed">${p.desc}</p>
+        <div class="mt-auto pt-6 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold text-ink/50 block">Harga</span>
+            <span class="text-lg font-extrabold">${fmtIDR(p.price)}</span>
+          </div>
+          <button onclick="addToCart('${p.id}')" class="btn-grad text-white text-xs font-extrabold px-5 py-2.5 rounded-full shadow-sm">
+            + Beli
+          </button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+searchInput.addEventListener('input', (e) => renderProducts(e.target.value));
+
+// Daily Coin Claim
+function claimDailyCoins() {
+  const today = new Date().toDateString();
+  if (lastClaimDate === today) {
+    showToast('Kamu sudah klaim koin hari ini! Kembali lagi besok ya 🪙');
+    return;
+  }
+  userCoins += CONFIG.dailyCoins;
+  lastClaimDate = today;
+  saveAllData();
+  updateRoleUI();
+  if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 60, origin: { y: 0.4 } });
+  showToast(`Berhasil klaim +${CONFIG.dailyCoins} koin harian gratis! 🎉`);
+}
+
+// Render Vouchers & Exchange
+const vouchersGrid = document.getElementById('vouchersGrid');
+function renderVouchers() {
+  vouchersGrid.innerHTML = VOUCHERS.map(v => `
+    <div class="card p-6 bg-white flex flex-col justify-between">
+      <div>
+        <span class="bg-purple/10 text-purple text-[10px] font-extrabold px-3 py-1 rounded-full uppercase">Voucher Diskon</span>
+        <h3 class="text-xl font-extrabold mt-3">${v.name}</h3>
+        <p class="text-xs text-ink/70 mt-1">Potongan harga otomatis untuk semua pembelian di keranjang.</p>
+      </div>
+      <div class="mt-6 pt-4 border-t border-ink/10 flex items-center justify-between">
+        <span class="text-xs font-extrabold text-ink/80">🪙 ${v.coinCost} Koin</span>
+        <button onclick="exchangeVoucher('${v.id}')" class="btn-ink text-xs font-extrabold px-5 py-2.5 rounded-full">
+          Tukar Voucher
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function exchangeVoucher(vId) {
+  const v = VOUCHERS.find(x => x.id === vId);
+  if (!v) return;
+  if (userCoins < v.coinCost) {
+    showToast(`Koin tidak cukup! Kamu butuh ${v.coinCost} koin.`);
+    return;
+  }
+  userCoins -= v.coinCost;
+  ownedVouchers.push({ ...v, ownedId: 'owned-' + Date.now() + '-' + Math.random().toString(36).slice(2,7) });
+  saveAllData();
+  updateRoleUI();
+  updateCartUI();
+  showToast(`Sukses menukar ${v.name}! Pilih voucher ini di keranjang saat belanja.`);
+}
+
+function selectCartVoucher(ownedId) {
+  activeVoucherId = ownedId || '';
+  saveAllData();
+  updateCartUI();
+}
+function removeVoucher() {
+  activeVoucherId = '';
+  const select = document.getElementById('cartVoucherSelect');
+  if (select) select.value = '';
+  saveAllData();
+  updateCartUI();
+  showToast('Voucher dilepas');
+}
+
+// Redeem Code Logic
+function handleMainRedeem() {
+  const input = document.getElementById('mainRedeemInput');
+  processRedeemCode(input.value.trim());
+  input.value = '';
+}
+
+function handleSidebarRedeem() {
+  const input = document.getElementById('sidebarRedeemInput');
+  processRedeemCode(input.value.trim());
+  input.value = '';
+  closeSidebar();
+}
+
+function processRedeemCode(code) {
+  const upper = code.toUpperCase();
+  // Security Guard check for malicious inputs
+  if (upper.includes('<SCRIPT') || upper.includes('DROP') || upper.includes('SELECT') || upper.length > 25) {
+    logViolation('Suspicious Redeem Input', code);
+    showToast('⚠️ Kode tidak valid / terdeteksi mencurigakan oleh Penjaga Link.');
+    return;
+  }
+
+  if (upper === 'KARYAKU2026') {
+    userCoins += 50;
+    saveAllData();
+    updateRoleUI();
+    if (typeof confetti === 'function') confetti();
+    showToast('Kode berhasil! Bonus +50 koin ditambahkan! 🪙');
+  } else if (upper === 'BONUS100') {
+    userCoins += 100;
+    saveAllData();
+    updateRoleUI();
+    if (typeof confetti === 'function') confetti();
+    showToast('Kode eksklusif berhasil! +100 koin ditambahkan! 🔥');
+  } else {
+    logViolation('Invalid Redeem Code', code);
+    showToast('Kode redeem tidak valid atau sudah kedaluwarsa.');
+  }
+}
+
+// Cart logic
+function addToCart(id) {
+  const prod = products.find(p => p.id === id);
+  if (!prod) return;
+  const existing = cart.find(item => item.id === id);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ id: prod.id, title: prod.title, price: prod.price, fileLink: prod.fileLink, qty: 1, creator: prod.creator });
+  }
+  saveAllData();
+  updateCartUI();
+  showToast('Berhasil ditambah ke keranjang!');
+}
+
+function updateCartUI() {
+  const totalCount = cart.reduce((sum, i) => sum + i.qty, 0);
+  let subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+
+  // Voucher is selected from the vouchers the user has exchanged for coins.
+  const voucherSelect = document.getElementById('cartVoucherSelect');
+  if (voucherSelect) {
+    const previous = activeVoucherId;
+    voucherSelect.innerHTML = '<option value="">Tanpa voucher</option>' + ownedVouchers.map(v =>
+      `<option value="${v.ownedId}">${v.name} — ${v.code}</option>`
+    ).join('');
+    if (ownedVouchers.some(v => v.ownedId === previous)) voucherSelect.value = previous;
+    else { activeVoucherId = ''; voucherSelect.value = ''; }
+  }
+  const activeVoucher = ownedVouchers.find(v => v.ownedId === activeVoucherId) || null;
+  let discount = activeVoucher ? subtotal * activeVoucher.discountRate : 0;
+  if (activeVoucher) {
+    document.getElementById('appliedVoucherInfo').classList.remove('hidden');
+    document.getElementById('activeVoucherName').textContent = activeVoucher.name;
+  } else {
+    document.getElementById('appliedVoucherInfo').classList.add('hidden');
+  }
+  const finalTotal = Math.max(0, subtotal - discount);
+
+  document.querySelectorAll('.cart-badge').forEach(b => {
+    b.textContent = totalCount;
+    b.classList.toggle('badge-show', totalCount > 0);
+  });
+  document.getElementById('cartCountBadge').textContent = totalCount;
+
+  const emptyState = document.getElementById('cartEmptyState');
+  const itemsList = document.getElementById('cartItemsList');
+  const cartFooter = document.getElementById('cartFooter');
+
+  if (cart.length === 0) {
+    emptyState.classList.remove('hidden');
+    itemsList.classList.add('hidden');
+    cartFooter.classList.add('hidden');
+  } else {
+    emptyState.classList.add('hidden');
+    itemsList.classList.remove('hidden');
+    cartFooter.classList.remove('hidden');
+
+    itemsList.innerHTML = cart.map(item => `
+      <div class="flex items-center justify-between pt-3 first:pt-0">
+        <div class="min-w-0 pr-3">
+          <h4 class="text-xs font-extrabold truncate">${item.title}</h4>
+          <p class="text-[11px] text-ink/60 mt-0.5">${fmtIDR(item.price)} × ${item.qty}</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-xs font-extrabold">${fmtIDR(item.price * item.qty)}</span>
+          <button onclick="removeFromCart('${item.id}')" class="text-ink/40 hover:text-magenta p-1"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('cartTotalPrice').textContent = fmtIDR(finalTotal);
+  }
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  saveAllData();
+  updateCartUI();
+  showToast('Item dihapus dari keranjang');
+}
+
+// Cart Drawer open/close
+const cartDrawer = document.getElementById('cartDrawer');
+const cartOverlay = document.getElementById('cartOverlay');
+
+document.getElementById('cartBtn').addEventListener('click', () => {
+  cartDrawer.classList.remove('translate-x-full');
+  cartOverlay.classList.add('open');
+});
+function closeCart() {
+  cartDrawer.classList.add('translate-x-full');
+  cartOverlay.classList.remove('open');
+}
+cartOverlay.addEventListener('click', closeCart);
+
+// Upload Modal
+const uploadModal = document.getElementById('uploadModal');
+const uploadForm = document.getElementById('uploadForm');
+
+document.getElementById('openUploadBtn').addEventListener('click', () => {
+  uploadModal.classList.add('open');
+});
+
+uploadForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const title = document.getElementById('upTitle').value.trim();
+  const cat = document.getElementById('upCat').value;
+  const price = parseFloat(document.getElementById('upPrice').value) || 0;
+  const creator = document.getElementById('upCreator').value.trim();
+  const fileLink = document.getElementById('upFileLink').value.trim();
+  const desc = document.getElementById('upDesc').value.trim();
+
+  const gradients = [
+    'linear-gradient(135deg,#7C3AED,#C026D3)',
+    'linear-gradient(135deg,#FF4A1F,#E60067)',
+    'linear-gradient(135deg,#0F766E,#14B8A6)',
+    'linear-gradient(135deg,#1E293B,#475569)'
+  ];
+  const hue = gradients[Math.floor(Math.random() * gradients.length)];
+
+  const newProd = {
+    id: 'prod-' + Date.now(),
+    title, cat, price, creator, fileLink, desc, hue,
+    rating: 5.0
+  };
+
+  products.unshift(newProd);
+  saveAllData();
+  renderProducts();
+  uploadModal.classList.remove('open');
+  uploadForm.reset();
+  showToast('Jualan baru berhasil diterbitkan!');
+  document.getElementById('etalase').scrollIntoView({ behavior: 'smooth' });
+});
+
+// QRIS Checkout Modal
+const qrisModal = document.getElementById('qrisModal');
+let qrisCountdownInterval = null;
+
+function openQrisModal() {
+  if (cart.length === 0) return;
+  closeCart();
+
+  let subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+  const activeVoucher = ownedVouchers.find(v => v.ownedId === activeVoucherId) || null;
+  let discount = activeVoucher ? subtotal * activeVoucher.discountRate : 0;
+  let finalTotal = Math.max(0, subtotal - discount);
+
+  document.getElementById('qrisTotalDisplay').textContent = fmtIDR(finalTotal);
+  qrisModal.classList.add('open');
+
+  let secondsLeft = 900;
+  clearInterval(qrisCountdownInterval);
+  qrisCountdownInterval = setInterval(() => {
+    secondsLeft--;
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    document.getElementById('qrisTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (secondsLeft <= 0) clearInterval(qrisCountdownInterval);
+  }, 1000);
+}
+
+function simulateQrisSuccess() {
+  qrisModal.classList.remove('open');
+  clearInterval(qrisCountdownInterval);
+
+  const orderId = 'INV-' + new Date().getFullYear() + '-' + Math.floor(10000 + Math.random() * 90000);
+  document.getElementById('successOrderId').textContent = orderId;
+
+  const container = document.getElementById('successLinksContainer');
+  container.innerHTML = cart.map(item => `
+    <div class="bg-white p-3 rounded-xl border border-ink/10 flex items-center justify-between gap-2">
+      <div class="min-w-0 pr-2">
+        <p class="text-xs font-extrabold truncate text-ink">${item.title}</p>
+        <a href="${item.fileLink}" target="_blank" class="text-[11px] text-magenta font-bold underline truncate block">${item.fileLink}</a>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <a href="${item.fileLink}" target="_blank" class="btn-grad text-white text-[10px] font-extrabold px-3 py-2 rounded-lg shadow-sm">
+          Download
+        </a>
+      </div>
+    </div>
+  `).join('');
+
+  cart = [];
+  if (activeVoucherId) ownedVouchers = ownedVouchers.filter(v => v.ownedId !== activeVoucherId);
+  activeVoucherId = '';
+  saveAllData();
+  updateCartUI();
+
+  document.getElementById('successModal').classList.add('open');
+  if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+}
+
+// Owner Account (Akun Pemilik) Portal
+function openOwnerLoginModal() {
+  closeSidebar();
+  document.getElementById('ownerLoginModal').classList.add('open');
+}
+
+async function sha256Hex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function verifyOwnerCode() {
+  const pass = document.getElementById('ownerPassInput').value.trim();
+  if ((CONFIG.ownerPassHash && await sha256Hex(pass) === CONFIG.ownerPassHash) || (CONFIG.ownerPass && pass === CONFIG.ownerPass)) {
+    document.getElementById('ownerLoginModal').classList.remove('open');
+    document.getElementById('ownerPassInput').value = '';
+    openOwnerDashboard();
+  } else {
+    logViolation('Failed Owner Login', pass);
+    showToast('⚠️ Kode rahasia pemilik salah!');
+  }
+}
+
+function openOwnerDashboard() {
+  document.getElementById('confDailyCoins').value = CONFIG.dailyCoins;
+  document.getElementById('confOwnerPass').value = '';\n  document.getElementById('confOwnerPass').placeholder = 'Kosongkan jika tidak ingin mengganti kode';
+
+  const vList = document.getElementById('violationsList');
+  if (securityViolations.length === 0) {
+    vList.innerHTML = `<p class="text-xs text-ink/50 text-center py-2">Tidak ada pelanggaran atau aktivitas mencurigakan tercatat.</p>`;
+  } else {
+    vList.innerHTML = securityViolations.map(v => `
+      <div class="bg-white p-2.5 rounded-lg border border-ink/10 text-xs flex justify-between items-center">
+        <div>
+          <span class="font-extrabold text-magenta">[${v.type}]</span>
+          <span class="text-ink/80 ml-2">Input: "${v.input}"</span>
+        </div>
+        <span class="text-[10px] text-ink/40">${v.time}</span>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('ownerDashboardModal').classList.add('open');
+}
+
+async function saveOwnerConfig() {
+  const cCoins = parseInt(document.getElementById('confDailyCoins').value, 10);
+  const cPass = document.getElementById('confOwnerPass').value.trim();
+
+  if (!isNaN(cCoins) && cCoins > 0) CONFIG.dailyCoins = cCoins;
+  if (cPass) CONFIG.ownerPassHash = await sha256Hex(cPass);
+
+  saveAllData();
+  showToast('Konfigurasi pemilik berhasil diperbarui!');
+  document.getElementById('ownerDashboardModal').classList.remove('open');
+}
+
+function clearViolations() {
+  securityViolations = [];
+  saveAllData();
+  openOwnerDashboard();
+  showToast('Log pelanggaran dibersihkan');
+}
+
+// Init on load
+document.getElementById('year').textContent = new Date().getFullYear();
+loadAllData();
+updateRoleUI();
+renderProducts();
+renderVouchers();
+updateCartUI();
+</script>
+</body>
+</html>
